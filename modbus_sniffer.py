@@ -148,7 +148,7 @@ class SerialSnooper:
                                 functionCodeMessage = 'Read Coils'
                             else:
                                 functionCodeMessage = 'Read Discrete Inputs'
-                            log.info("Master\t\t-> ID: {}, {}: {}: {}, Read address: {}, Read Quantity: {}".format(unitIdentifier, functionCodeMessage, functionCode, readAddress, readQuantity))
+                            log.info("Master\t\t-> ID: {}, {}: 0x{:02x}, Read address: {}, Read Quantity: {}".format(unitIdentifier, functionCodeMessage, functionCode, readAddress, readQuantity))
                             modbusdata = modbusdata[bufferIndex:]
                             bufferIndex = 0
                     else:
@@ -186,42 +186,11 @@ class SerialSnooper:
                                         functionCodeMessage = 'Read Coils'
                                     else:
                                         functionCodeMessage = 'Read Discrete Inputs'
-                                    log.info("Slave\t-> ID: {}, {}: {}, Read byte count: {}, Read data: [{}]".format(unitIdentifier, functionCodeMessage, functionCode, readByteCount, " ".join(["{:02x}".format(x) for x in readData])))
+                                    log.info("Slave\t-> ID: {}, {}: 0x{:02x}, Read byte count: {}, Read data: [{}]".format(unitIdentifier, functionCodeMessage, functionCode, readByteCount, " ".join(["{:02x}".format(x) for x in readData])))
                                     modbusdata = modbusdata[bufferIndex:]
                                     bufferIndex = 0
                             else:
                                 needMoreData = True
-                        else:
-                            needMoreData = True
-
-                    if (request == False) & (responce == False):
-                        # Error size: UnitIdentifier (1) + FunctionCode (1) + ExceptionCode (1) + CRC (2)
-                        expectedLenght = 5 # 5
-                        if len(modbusdata) >= (frameStartIndex + expectedLenght):
-                            bufferIndex = frameStartIndex + 2
-                            # Exception Code (1)
-                            exceptionCode = modbusdata[bufferIndex]
-                            bufferIndex += 1
-                            
-                            # CRC16 (2)
-                            crc16 = (modbusdata[bufferIndex] * 0x0100) + modbusdata[bufferIndex + 1]
-                            metCRC16 = self.calcCRC16(modbusdata, bufferIndex)
-                            bufferIndex += 2
-                            if crc16 == metCRC16:
-                                if self.trashdata:
-                                    self.trashdata = False
-                                    self.trashdataf += "]"
-                                    log.info(self.trashdataf)
-                                request = False
-                                responce = False
-                                error = True
-                                if functionCode == 1:
-                                    functionCodeMessage = 'Read Coils'
-                                else:
-                                    functionCodeMessage = 'Read Discrete Inputs'
-                                log.info("Slave\t-> ID: {}, {}: {}, Exception: {}".format(unitIdentifier, functionCodeMessage, functionCode, exceptionCode))
-                                modbusdata = modbusdata[bufferIndex:]
-                                bufferIndex = 0
                         else:
                             needMoreData = True
 
@@ -253,7 +222,7 @@ class SerialSnooper:
                                 functionCodeMessage = 'Read Holding Registers'
                             else:
                                 functionCodeMessage = 'Read Input Registers'
-                            log.info("Master\t-> ID: {}, {}: {}, Read address: {}, Read Quantity: {}".format(unitIdentifier, functionCodeMessage, functionCode, readAddress, readQuantity))
+                            log.info("Master\t-> ID: {}, {}: 0x{:02x}, Read address: {}, Read Quantity: {}".format(unitIdentifier, functionCodeMessage, functionCode, readAddress, readQuantity))
                             modbusdata = modbusdata[bufferIndex:]
                             bufferIndex = 0
                     else:
@@ -291,7 +260,7 @@ class SerialSnooper:
                                         functionCodeMessage = 'Read Holding Registers'
                                     else:
                                         functionCodeMessage = 'Read Input Registers'
-                                    log.info("Slave\t-> ID: {}, {}: {}, Read byte count: {}, Read data: [{}]".format(unitIdentifier, functionCodeMessage, functionCode, readByteCount, " ".join(["{:02x}".format(x) for x in readData])))
+                                    log.info("Slave\t-> ID: {}, {}: 0x{:02x}, Read byte count: {}, Read data: [{}]".format(unitIdentifier, functionCodeMessage, functionCode, readByteCount, " ".join(["{:02x}".format(x) for x in readData])))
                                     modbusdata = modbusdata[bufferIndex:]
                                     bufferIndex = 0
                             else:
@@ -299,38 +268,6 @@ class SerialSnooper:
                         else:
                             needMoreData = True
 
-                    if (request == False) & (responce == False):
-                        # Error size: UnitIdentifier (1) + FunctionCode (1) + ExceptionCode (1) + CRC (2)
-                        expectedLenght = 5 # 5
-                        if len(modbusdata) >= (frameStartIndex + expectedLenght):
-                            bufferIndex = frameStartIndex + 2
-                            # Exception Code (1)
-                            exceptionCode = modbusdata[bufferIndex]
-                            bufferIndex += 1
-                            
-                            # CRC16 (2)
-                            crc16 = (modbusdata[bufferIndex] * 0x0100) + modbusdata[bufferIndex + 1]
-                            metCRC16 = self.calcCRC16(modbusdata, bufferIndex)
-                            bufferIndex += 2
-                            if crc16 == metCRC16:
-                                if self.trashdata:
-                                    self.trashdata = False
-                                    self.trashdataf += "]"
-                                    log.info(self.trashdataf)
-                                request = False
-                                responce = False
-                                error = True
-                                if functionCode == 3:
-                                    functionCodeMessage = 'Read Holding Registers'
-                                else:
-                                    functionCodeMessage = 'Read Input Registers'
-                                log.info("Slave\t-> ID: {}, {}: {}, Exception: {}".format(unitIdentifier, functionCodeMessage, functionCode, exceptionCode))
-                                modbusdata = modbusdata[bufferIndex:]
-                                bufferIndex = 0
-                        else:
-                           needMoreData = True
-
-                
                 # FC05 (0x05) Write Single Coil
                 elif (functionCode == 5):
             
@@ -358,7 +295,7 @@ class SerialSnooper:
                             request = True
                             responce = False
                             error = False
-                            log.info("Master\t-> ID: {}, Write Single Coil: {}, Write address: {}, Write data: [{}]".format(unitIdentifier, functionCode, writeAddress, " ".join(["{:02x}".format(x) for x in writeData])))
+                            log.info("Master\t-> ID: {}, Write Single Coil: 0x{:02x}, Write address: {}, Write data: [{}]".format(unitIdentifier, functionCode, writeAddress, " ".join(["{:02x}".format(x) for x in writeData])))
                             modbusdata = modbusdata[bufferIndex:]
                             bufferIndex = 0
                     else:
@@ -384,34 +321,7 @@ class SerialSnooper:
                                 request = False
                                 responce = True
                                 error = False
-                                log.info("Slave\t-> ID: {}, Write Single Coil: {}, Write address: {}".format(unitIdentifier, functionCode, writeAddress))
-                                modbusdata = modbusdata[bufferIndex:]
-                                bufferIndex = 0
-                        else:
-                            needMoreData = True
-
-                    if (request == False) & (responce == False):
-                        # Error size: UnitIdentifier (1) + FunctionCode (1) + ExceptionCode (1) + CRC (2)
-                        expectedLenght = 5 # 5
-                        if len(modbusdata) >= (frameStartIndex + expectedLenght):
-                            bufferIndex = frameStartIndex + 2
-                            # Exception Code (1)
-                            exceptionCode = modbusdata[bufferIndex]
-                            bufferIndex += 1
-                            
-                            # CRC16 (2)
-                            crc16 = (modbusdata[bufferIndex] * 0x0100) + modbusdata[bufferIndex + 1]
-                            metCRC16 = self.calcCRC16(modbusdata, bufferIndex)
-                            bufferIndex += 2
-                            if crc16 == metCRC16:
-                                if self.trashdata:
-                                    self.trashdata = False
-                                    self.trashdataf += "]"
-                                    log.info(self.trashdataf)
-                                request = False
-                                responce = False
-                                error = True
-                                log.info("Slave\t-> ID: {}, Write Single Coil: {}, Exception: {}".format(unitIdentifier, functionCode, exceptionCode))
+                                log.info("Slave\t-> ID: {}, Write Single Coil: 0x{:02x}, Write address: {}".format(unitIdentifier, functionCode, writeAddress))
                                 modbusdata = modbusdata[bufferIndex:]
                                 bufferIndex = 0
                         else:
@@ -444,7 +354,7 @@ class SerialSnooper:
                             request = True
                             responce = False
                             error = False
-                            log.info("Master\t-> ID: {}, Write Single Register: {}, Write address: {}, Write data: [{}]".format(unitIdentifier, functionCode, writeAddress, " ".join(["{:02x}".format(x) for x in writeData])))
+                            log.info("Master\t-> ID: {}, Write Single Register: 0x{:02x}, Write address: {}, Write data: [{}]".format(unitIdentifier, functionCode, writeAddress, " ".join(["{:02x}".format(x) for x in writeData])))
                             modbusdata = modbusdata[bufferIndex:]
                             bufferIndex = 0
                     else:
@@ -475,40 +385,12 @@ class SerialSnooper:
                                 request = False
                                 responce = True
                                 error = False
-                                log.info("Slave\t-> ID: {}, Write Single Register: {}, Write address: {}, Write data: [{}]".format(unitIdentifier, functionCode, writeAddress, " ".join(["{:02x}".format(x) for x in writeData])))
+                                log.info("Slave\t-> ID: {}, Write Single Register: 0x{:02x}, Write address: {}, Write data: [{}]".format(unitIdentifier, functionCode, writeAddress, " ".join(["{:02x}".format(x) for x in writeData])))
                                 modbusdata = modbusdata[bufferIndex:]
                                 bufferIndex = 0
                         else:
                             needMoreData = True
 
-                    if (request == False) & (responce == False):
-                        # Error size: UnitIdentifier (1) + FunctionCode (1) + ExceptionCode (1) + CRC (2)
-                        expectedLenght = 5 # 5
-                        if len(modbusdata) >= (frameStartIndex + expectedLenght):
-                            bufferIndex = frameStartIndex + 2
-                            # Exception Code (1)
-                            exceptionCode = modbusdata[bufferIndex]
-                            bufferIndex += 1
-                            
-                            # CRC16 (2)
-                            crc16 = (modbusdata[bufferIndex] * 0x0100) + modbusdata[bufferIndex + 1]
-                            metCRC16 = self.calcCRC16(modbusdata, bufferIndex)
-                            bufferIndex += 2
-                            if crc16 == metCRC16:
-                                if self.trashdata:
-                                    self.trashdata = False
-                                    self.trashdataf += "]"
-                                    log.info(self.trashdataf)
-                                request = False
-                                responce = False
-                                error = True
-                                log.info("Slave\t-> ID: {}, Write Single Register: {}, Exception: {}".format(unitIdentifier, functionCode, exceptionCode))
-                                modbusdata = modbusdata[bufferIndex:]
-                                bufferIndex = 0
-                        else:
-                            needMoreData = True
-
-                    
                 # FC07 (0x07) Read Exception Status (Serial Line only)
                 # elif (functionCode == 7):
                 
@@ -557,7 +439,7 @@ class SerialSnooper:
                                 request = True
                                 responce = False
                                 error = False
-                                log.info("Master\t-> ID: {}, Write Multiple Coils: {}, Write address: {}, Write quantity: {}, Write data: [{}]".format(unitIdentifier, functionCode, writeAddress, writeQuantity, " ".join(["{:02x}".format(x) for x in writeData])))
+                                log.info("Master\t-> ID: {}, Write Multiple Coils: 0x{:02x}, Write address: {}, Write quantity: {}, Write data: [{}]".format(unitIdentifier, functionCode, writeAddress, writeQuantity, " ".join(["{:02x}".format(x) for x in writeData])))
                                 modbusdata = modbusdata[bufferIndex:]
                                 bufferIndex = 0
                         else:
@@ -588,40 +470,12 @@ class SerialSnooper:
                                 request = False
                                 responce = True
                                 error = False
-                                log.info("Slave\t-> ID: {}, Write Multiple Coils: {}, Write address: {}, Write Quantity: {}".format(unitIdentifier, functionCode, writeAddress, writeQuantity))
+                                log.info("Slave\t-> ID: {}, Write Multiple Coils: 0x{:02x}, Write address: {}, Write Quantity: {}".format(unitIdentifier, functionCode, writeAddress, writeQuantity))
                                 modbusdata = modbusdata[bufferIndex:]
                                 bufferIndex = 0
                         else:
                             needMoreData = True
 
-                    if (request == False) & (responce == False):
-                        # Error size: UnitIdentifier (1) + FunctionCode (1) + ExceptionCode (1) + CRC (2)
-                        expectedLenght = 5 # 5
-                        if len(modbusdata) >= (frameStartIndex + expectedLenght):
-                            bufferIndex = frameStartIndex + 2
-                            # Exception Code (1)
-                            exceptionCode = modbusdata[bufferIndex]
-                            bufferIndex += 1
-                            
-                            # CRC16 (2)
-                            crc16 = (modbusdata[bufferIndex] * 0x0100) + modbusdata[bufferIndex + 1]
-                            metCRC16 = self.calcCRC16(modbusdata, bufferIndex)
-                            bufferIndex += 2
-                            if crc16 == metCRC16:
-                                if self.trashdata:
-                                    self.trashdata = False
-                                    self.trashdataf += "]"
-                                    log.info(self.trashdataf)
-                                request = False
-                                responce = False
-                                error = True
-                                log.info("Slave\t-> ID: {}, Write Multiple Coils: {}, Exception: {}".format(unitIdentifier, functionCode, exceptionCode))
-                                modbusdata = modbusdata[bufferIndex:]
-                                bufferIndex = 0
-                        else:
-                            needMoreData = True
-
-                    
                 # FC16 (0x10) Write Multiple registers
                 elif (functionCode == 16):
                     
@@ -658,7 +512,7 @@ class SerialSnooper:
                                 request = True
                                 responce = False
                                 error = False
-                                log.info("Master\t-> ID: {}, Write Multiple registers: {}, Write address: {}, Write quantity: {}, Write data: [{}]".format(unitIdentifier, functionCode, writeAddress, writeQuantity, " ".join(["{:02x}".format(x) for x in writeData])))
+                                log.info("Master\t-> ID: {}, Write Multiple registers: 0x{:02x}, Write address: {}, Write quantity: {}, Write data: [{}]".format(unitIdentifier, functionCode, writeAddress, writeQuantity, " ".join(["{:02x}".format(x) for x in writeData])))
                                 modbusdata = modbusdata[bufferIndex:]
                                 bufferIndex = 0
                         else:
@@ -689,7 +543,7 @@ class SerialSnooper:
                                 request = False
                                 responce = True
                                 error = False
-                                log.info("Slave\t-> ID: {}, Write Multiple registers: {}, Write address: {}, Write quantity: {}".format(unitIdentifier, functionCode, writeAddress, writeQuantity))
+                                log.info("Slave\t-> ID: {}, Write Multiple registers: 0x{:02x}, Write address: {}, Write quantity: {}".format(unitIdentifier, functionCode, writeAddress, writeQuantity))
                                 modbusdata = modbusdata[bufferIndex:]
                                 bufferIndex = 0
                         else:
@@ -716,13 +570,12 @@ class SerialSnooper:
                                 request = False
                                 responce = False
                                 error = True
-                                log.info("Slave\t-> ID: {}, Write Multiple registers: {}, Exception: {}".format(unitIdentifier, functionCode, exceptionCode))
+                                log.info("Slave\t-> ID: {}, Write Multiple registers: 0x{:02x}, Exception: {}".format(unitIdentifier, functionCode, exceptionCode))
                                 modbusdata = modbusdata[bufferIndex:]
                                 bufferIndex = 0
                         else:
                             needMoreData = True
 
-                    
                 # FC17 (0x11) Report Server ID (Serial Line only)
                 # elif (functionCode == 17):
                     
@@ -777,7 +630,7 @@ class SerialSnooper:
                                 request = True
                                 responce = False
                                 error = False
-                                log.info("Master\t-> ID: {}, Read/Write Multiple registers: {}, Read address: {}, Read Quantity: {}, Write address: {}, Write quantity: {}, Write data: [{}]".format(unitIdentifier, functionCode, readAddress, writeAddress, readQuantity, writeQuantity, " ".join(["{:02x}".format(x) for x in writeData])))
+                                log.info("Master\t-> ID: {}, Read/Write Multiple registers: 0x{:02x}, Read address: {}, Read Quantity: {}, Write address: {}, Write quantity: {}, Write data: [{}]".format(unitIdentifier, functionCode, readAddress, writeAddress, readQuantity, writeQuantity, " ".join(["{:02x}".format(x) for x in writeData])))
                                 modbusdata = modbusdata[bufferIndex:]
                                 bufferIndex = 0
                         else:
@@ -813,48 +666,49 @@ class SerialSnooper:
                                     request = False
                                     responce = True
                                     error = False
-                                    log.info("Slave\t-> ID: {}, Read/Write Multiple registers: {}, Read byte count: {}, Read data: [{}]".format(unitIdentifier, functionCode, readByteCount, " ".join(["{:02x}".format(x) for x in readData])))
+                                    log.info("Slave\t-> ID: {}, Read/Write Multiple registers: 0x{:02x}, Read byte count: {}, Read data: [{}]".format(unitIdentifier, functionCode, readByteCount, " ".join(["{:02x}".format(x) for x in readData])))
                                     modbusdata = modbusdata[bufferIndex:]
                                     bufferIndex = 0
                             else:
                                 needMoreData = True
                         else:
                             needMoreData = True
-
-                    if (request == False) & (responce == False):
-                        # Error size: UnitIdentifier (1) + FunctionCode (1) + ExceptionCode (1) + CRC (2)
-                        expectedLenght = 5 # 5
-                        if len(modbusdata) >= (frameStartIndex + expectedLenght):
-                            bufferIndex = frameStartIndex + 2
-                            # Exception Code (1)
-                            exceptionCode = modbusdata[bufferIndex]
-                            bufferIndex += 1
-                            
-                            # CRC16 (2)
-                            crc16 = (modbusdata[bufferIndex] * 0x0100) + modbusdata[bufferIndex + 1]
-                            metCRC16 = self.calcCRC16(modbusdata, bufferIndex)
-                            bufferIndex += 2
-                            if crc16 == metCRC16:
-                                if self.trashdata:
-                                    self.trashdata = False
-                                    self.trashdataf += "]"
-                                    log.info(self.trashdataf)
-                                request = False
-                                responce = False
-                                error = True
-                                log.info("Slave\t-> ID: {}, Read/Write Multiple registers: {}, Exception: {}".format(unitIdentifier, functionCode, exceptionCode))
-                                modbusdata = modbusdata[bufferIndex:]
-                                bufferIndex = 0
-                        else:
-                            needMoreData = True
-
-                        
+   
                 # FC24 (0x18) Read FIFO Queue
                 # elif (functionCode == 24):
                     
                 # FC43 ( 0x2B) Encapsulated Interface Transport
                 # elif (functionCode == 43):
                 
+                # FC80+ ( 0x80 + FC) Exeption
+                elif (functionCode >= 0x80):
+                
+                    # Error size: UnitIdentifier (1) + FunctionCode (1) + ExceptionCode (1) + CRC (2)
+                    expectedLenght = 5 # 5
+                    if len(modbusdata) >= (frameStartIndex + expectedLenght):
+                        bufferIndex = frameStartIndex + 2
+                        # Exception Code (1)
+                        exceptionCode = modbusdata[bufferIndex]
+                        bufferIndex += 1
+                        
+                        # CRC16 (2)
+                        crc16 = (modbusdata[bufferIndex] * 0x0100) + modbusdata[bufferIndex + 1]
+                        metCRC16 = self.calcCRC16(modbusdata, bufferIndex)
+                        bufferIndex += 2
+                        if crc16 == metCRC16:
+                            if self.trashdata:
+                                self.trashdata = False
+                                self.trashdataf += "]"
+                                log.info(self.trashdataf)
+                            request = False
+                            responce = False
+                            error = True
+                            log.info("Slave\t-> ID: {}, Exception: 0x{:02x}, Code: {}".format(unitIdentifier, functionCode, exceptionCode))
+                            modbusdata = modbusdata[bufferIndex:]
+                            bufferIndex = 0
+                    else:
+                        needMoreData = True
+
             else:
                 needMoreData = True
 
