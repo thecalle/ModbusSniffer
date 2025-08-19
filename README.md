@@ -19,6 +19,7 @@ Arguments:
   -p, --port        select the serial port (Required)  
   -b, --baudrate    set the communication baud rate, default = 9600 (Option)  
   -t, --timeout     overrite the calculated inter frame timeout, default = 0.0034375s (Option)
+  -l, --logfile     save terminal output to file
   -h, --help        print the documentation
 ```
 
