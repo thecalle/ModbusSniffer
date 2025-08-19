@@ -45,10 +45,11 @@ log.addHandler(handler)
 # --------------------------------------------------------------------------- #
 class SerialSnooper:
 
-    def __init__(self, port, baud=9600, timeout=0):
+    def __init__(self, port, baud=9600, timeout=0, logfile=None):
         self.port = port
         self.baud = baud
         self.timeout = timeout
+		self.logfile = logfile
 
         log.info("Opening serial interface: \n" + "\tport: {} \n".format(port) + "\tbaudrate: {}\n".format(baud) + "\tbytesize: 8\n" + "\tparity: none\n" + "\tstopbits: 1\n" + "\ttimeout: {}\n".format(timeout))
         self.connection = serial.Serial(port=port, baudrate=baud, bytesize=serial.EIGHTBITS, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, timeout=timeout)
@@ -852,9 +853,10 @@ if __name__ == "__main__":
     port = None
     baud = 9600
     timeout = None
+	logfile = None
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:],"hp:b:t:",["help", "port=", "baudrate=", "timeout="])
+        opts, args = getopt.getopt(sys.argv[1:],"hp:b:t:l:",["help", "port=", "baudrate=", "timeout=","logfile="])
     except getopt.GetoptError as e:
         log.debug(e)
         printHelp(baud, timeout)
@@ -869,6 +871,8 @@ if __name__ == "__main__":
             baud = int(arg)
         elif opt in ("-t", "--timeout"):
             timeout = float(arg)
+		elif opt in ("-l", "--logfile"):
+			logfile = arg
     
     if port == None:
         print("Serial Port not defined please use:")
@@ -878,7 +882,7 @@ if __name__ == "__main__":
     if timeout == None:
         timeout = calcTimeout(baud)
     
-    with SerialSnooper(port, baud, timeout) as sniffer:
+    with SerialSnooper(port, baud, timeout, logfile) as sniffer:
         while True:
             data = sniffer.read_raw()
             sniffer.process_data(data)
